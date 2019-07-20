@@ -1,0 +1,28 @@
+{
+  "name": "homebridge-tuya-web",
+  "version": "0.1.0",
+  "description": "Homebrigde plugin for use with Tuya devices (uses Home Assistant Tuya Web API)",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "homebridge",
+    "homebridge-plugin",
+    "tuya",
+    "smartlife"
+  ],
+  "author": "Bas Delfos",
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "dependencies": {
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0"
+  }
+}
