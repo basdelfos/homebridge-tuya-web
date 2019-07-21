@@ -24,6 +24,12 @@ class TuyaWebPlatform {
     this.log = log;
     this.config = config;
     this.pollingInterval = 10; // default 10 seconds
+    this.refreshInterval;
+
+    if (!config) {
+      this.log('No config found, disabling plugin.')
+      return;
+    }
 
     // Create Tuya Web API instance
     this.tuyaWebApi = new TuyaWebApi(
@@ -55,30 +61,37 @@ class TuyaWebPlatform {
             for (const device of devices) {
               this.addAccessory(device);
             }
+            // Get device strate of all devices - once
+            this.refreshDeviceStates();
           });
 
-          setInterval(() => {
-            this.log.debug('Refreshing State Of All Devices...');
-            this.tuyaWebApi.getAllDeviceStates().then((devices) => {
-              // Refresh device states
-              for (const device of devices) {
-                const uuid = this.api.hap.uuid.generate(device.id);
-                const homebridgeAccessory = this.accessories.get(uuid);
-                if (homebridgeAccessory) {
-                  homebridgeAccessory.controller.updateState(device.data);
-                }
-                else {
-                  this.log.error('Could not find accessory in dictionary');
-                }
-              }
-            }).catch((error) => {
-              this.log.error('Error retrieving devices states', error);
-            });
+          // Set interval for refreshing device states
+          this.refreshInterval = setInterval(() => {
+            this.refreshDeviceStates();
           }, this.pollingInterval * 1000);
         });
 
       }.bind(this));
     }
+  }
+
+  refreshDeviceStates() {
+    this.log.debug('Refreshing state for all devices...');
+    this.tuyaWebApi.getAllDeviceStates().then((devices) => {
+      // Refresh device states
+      for (const device of devices) {
+        const uuid = this.api.hap.uuid.generate(device.id);
+        const homebridgeAccessory = this.accessories.get(uuid);
+        if (homebridgeAccessory) {
+          homebridgeAccessory.controller.updateAccessory(device);
+        }
+        else {
+          this.log.error('Could not find accessory in dictionary');
+        }
+      }
+    }).catch((error) => {
+      this.log.error('Error retrieving devices states', error);
+    });
   }
 
   addAccessory(device) {
