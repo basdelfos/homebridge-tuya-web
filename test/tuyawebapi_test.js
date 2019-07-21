@@ -22,9 +22,9 @@ describe('TuyaWebApi', () => {
   describe('get access token', () => {
     it('should get an access token from the web api', (done) => {
 
-      api.getOrRefreshToken().then((token) => {
-        api.token = token || null;
-        assert.notEqual(token.accessToken, null, 'No valid access token');
+      api.getOrRefreshToken().then((session) => {
+        api.session = session || null;
+        assert.notEqual(session.accessToken, null, 'No valid access token');
         done();
       });
 
