@@ -1,4 +1,7 @@
-const SwitchAccessory = require('lib/switch_accessory');
+const SwitchAccessory = require('./lib/switch_accessory');
+const OutletAccessory = require('./lib/outlet_accessory');
+const DimmerAccessory = require('./lib/dimmer_accessory');
+const TuyaWebApi = require('./lib/tuyawebapi');
 
 var Accessory, Service, Characteristic, UUIDGen;
 
@@ -20,11 +23,17 @@ class TuyaWebPlatform {
   constructor(log, config, api) {
     this.log = log;
     this.config = config;
+    this.pollingInterval = 10; // default 10 seconds
+
+    // Create Tuya Web API instance
+    this.tuyaWebApi = new TuyaWebApi(
+      this.config.options.username,
+      this.config.options.password,
+      this.config.options.countryCode,
+      this.config.options.platform
+    );
 
     this.accessories = new Map();
-
-    // Create instance of TuyaDiscover
-    this.discovery = new TuyaWebDiscover(this.log, this.config.devices);
 
     if (api) {
       // Save the API object as plugin needs to register new accessory via this object
@@ -36,43 +45,40 @@ class TuyaWebPlatform {
       this.api.on('didFinishLaunching', function () {
         this.log("Initializing TuyaWebPlatform...");
 
-        // Create Tuya Web API instance
-        this.tuyaWebApi = new TuyaWebApi(
-          'b.delfos@gmail.com',
-          'yfrHt*?{dh57<~',
-          31,
-          'smart_life'
-        );
-
         // Get access token
-        api.getOrRefreshToken().then((token) => {
+        this.tuyaWebApi.getOrRefreshToken().then((token) => {
           this.tuyaWebApi.token = token;
 
           // Start discovery for devices
-          this.discovery.startDiscovery().then((devices) => {
+          this.tuyaWebApi.discoverDevices().then((devices) => {
             // Add devices to Homebridge
-            for (device in devices) {
-              addAccessory(device);
+            for (const device of devices) {
+              this.addAccessory(device);
             }
           });
+
+          setInterval(() => {
+            this.log.debug('Refreshing State Of All Devices...');
+            this.tuyaWebApi.getAllDeviceStates().then((devices) => {
+              // Refresh device states
+              for (const device of devices) {
+                const uuid = this.api.hap.uuid.generate(device.id);
+                const homebridgeAccessory = this.accessories.get(uuid);
+                if (homebridgeAccessory) {
+                  homebridgeAccessory.controller.updateState(device.data);
+                }
+                else {
+                  this.log.error('Could not find accessory in dictionary');
+                }
+              }
+            }).catch((error) => {
+              this.log.error('Error retrieving devices states', error);
+            });
+          }, this.pollingInterval * 1000);
         });
 
       }.bind(this));
     }
-
-    // // When a new device is found, add it to Homebridge
-    // this.discovery.on('device-new', device => {
-    //   this.log.info('New Device Online: %s (%s)', device.name || 'unnamed', device.id);
-    //   this.addAccessory(device);
-    // });
-
-    // // If a device is unreachable, remove it from Homebridge
-    // this.discovery.on('device-offline', device => {
-    //   this.log.info('Device Offline: %s (%s)', device.name || 'unnamed', device.id);
-
-    //   const uuid = this.api.hap.uuid.generate(device.id);
-    //   this.removeAccessory(this.accessories.get(uuid));
-    // });
   }
 
   addAccessory(device) {
@@ -80,30 +86,39 @@ class TuyaWebPlatform {
     this.log.info('Adding: %s (%s / %s)', device.name || 'unnamed', deviceType, device.id);
 
     // Get UUID
-    const uuid = knownUUId || this.api.hap.uuid.generate(device.id);
+    const uuid = this.api.hap.uuid.generate(device.id);
     const homebridgeAccessory = this.accessories.get(uuid);
 
     // Construct new accessory
     let deviceAccessory;
     switch (deviceType) {
       case 'light':
-        // deviceAccessory = new LightAccessory(this, homebridgeAccessory, device);
+      case 'dimmer':
+        deviceAccessory = new DimmerAccessory(this, homebridgeAccessory, device);
+        this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
         break;
       case 'switch':
+      case 'outlet':
+        deviceAccessory = new OutletAccessory(this, homebridgeAccessory, device);
+        this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
+        break;
       default:
-        deviceAccessory = new SwitchAccessory(this, homebridgeAccessory, device);
+        this.log.warn('Could not init class for device type [%s]', deviceType);
         break;
     }
+  }
 
-    // Add to global map
-    this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
+  // Called from device classes
+  registerPlatformAccessory(platformAccessory) {
+    this.log.debug('Register Platform Accessory (%s)', platformAccessory.displayName);
+    this.api.registerPlatformAccessories('homebridge-tuya-web', 'TuyaWebPlatform', [platformAccessory]);
   }
 
   // Function invoked when homebridge tries to restore cached accessory.
   // Developer can configure accessory at here (like setup event handler).
   // Update current value.
   configureAccessory(accessory) {
-    this.log("Configure Accessory [%s]", accessory.displayName);
+    this.log("Configuring cached accessory [%s]", accessory.displayName, accessory.context.deviceId, accessory.UUID);
 
     // Set the accessory to reachable if plugin can currently process the accessory,
     // otherwise set to false and update the reachability later by invoking 
@@ -111,27 +126,16 @@ class TuyaWebPlatform {
     accessory.reachable = true;
 
     accessory.on('identify', function (paired, callback) {
-      this.log("Identify [%s]", accessory.displayName);
+      this.log.debug('[IDENTIFY][%s]', accessory.displayName);
       callback();
     });
 
-    // TODO --> create instance of device specific class
-
-    // if (accessory.getService(Service.Lightbulb)) {
-    //   accessory.getService(Service.Lightbulb)
-    //     .getCharacteristic(Characteristic.On)
-    //     .on('set', function (value, callback) {
-    //       platform.log(accessory.displayName, "Light -> " + value);
-    //       callback();
-    //     });
-    // }
-
-    this.accessories.add(accessory.uuid, accessory);
+    this.accessories.set(accessory.UUID, accessory);
   }
 
-  updateAccessoriesReachability(accessory) {
-    this.log("Update Reachability [%s]", accessory.displayName);
-    accessory.updateReachability(false);
+  updateAccessoryReachability(accessory, state) {
+    this.log("Update Reachability [%s]", accessory.displayName, state);
+    accessory.updateReachability(state);
   }
 
   // Sample function to show how developer can remove accessory dynamically from outside event
