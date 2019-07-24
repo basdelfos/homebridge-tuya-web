@@ -1,4 +1,5 @@
 # homebridge-tuya-web
+
 Homebridge plugin for Tuya devices using a cloud Tuya Web Api.
 
 This Homebridge plugin is based on the Home Assistent Tuya integration that implements a special Tuya Home Assistant API.
@@ -6,7 +7,9 @@ This Homebridge plugin is based on the Home Assistent Tuya integration that impl
 See [Home Assistant Tuya integration](https://www.home-assistant.io/components/tuya/) and [Tuyaha python library](https://github.com/PaulAnnekov/tuyaha).
 
 ## Features
+
 This Homebridge Plugin implements the following features:
+
 - Controlling Tuya WIFI enabled devices form within HomeKit enabled iOS Apps.
 - Uses simple and lightweight Cloud Web API to control and get state update from Tuya devices. You will need a stable internet connection to control the devices and get frequent state updates.
 - Device State Caching. State of devices is cached in memory, every time a HomeKit app request status updates from the devices this results in a very fast and responsive response. State cache is updated every 10 seconds and when controled from a HomeKit app. There can be a latancy in updates when a device is controled form an App/Hub/Controller other than HomeKit, e.g. from the Tuya Android/iOS App.
