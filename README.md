@@ -26,14 +26,13 @@ npm i homebridge-tuya-web -g
 {
   "platform": "TuyaWebPlatform",
   "name": "TuyaWebPlatform",
-  "options": [
+  "options":
     {
       "username": "xxxx@gmail.com",
       "password": "xxxxxxxxxx",
       "countryCode": "xx",
       "platform": "smart_life"
     }
-  ]
 }
 ```
 
