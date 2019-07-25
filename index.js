@@ -115,6 +115,10 @@ class TuyaWebPlatform {
         deviceAccessory = new OutletAccessory(this, homebridgeAccessory, device);
         this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
         break;
+        case 'cover':
+          deviceAccessory = new CoverAccessory(this, homebridgeAccessory, device);
+          this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
+          break;
       default:
         this.log.warn('Could not init class for device type [%s]', deviceType);
         break;
