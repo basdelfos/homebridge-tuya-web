@@ -26,7 +26,7 @@ npm i homebridge-tuya-web -g
 {
   "platform": "TuyaWebPlatform",
   "name": "TuyaWebPlatform",
-  "options": [
+  "options":
     {
       "username": "xxxx@gmail.com",
       "password": "xxxxxxxxxx",
@@ -34,7 +34,6 @@ npm i homebridge-tuya-web -g
       "platform": "smart_life",
       "pollingInterval": 10
     }
-  ]
 }
 ```
 
