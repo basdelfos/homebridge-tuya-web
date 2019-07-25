@@ -31,7 +31,8 @@ npm i homebridge-tuya-web -g
       "username": "xxxx@gmail.com",
       "password": "xxxxxxxxxx",
       "countryCode": "xx",
-      "platform": "smart_life"
+      "platform": "smart_life",
+      "pollingInterval": 10
     }
   ]
 }
@@ -43,6 +44,7 @@ The `options` has these properties:
 - `password`: Required. The password for the account that is registered in the Android/iOS App.
 - `countryCode`: Required. Your account [country code](https://www.countrycode.org/), e.g., 1 for USA or 86 for China.
 - `plaform`: The App where your account is registered. `tuya` for Tuya Smart, `smart_life` for Smart Life, `jinvoo_smart` for Jinvoo Smart. Defaults to `tuya`.
+- `pollingInterval`: Optional. The frequency in **seconds** that the plugin polls the cloud to get device updates. When the devices are only controlled through Homebridge, you can set this to a low frequency (high interval nummer, e.g. 180 = 3 minutes). Defaults to 10.
 
 ## Supported device types
 

@@ -26,10 +26,13 @@ class TuyaWebPlatform {
     this.pollingInterval = 10; // default 10 seconds
     this.refreshInterval;
 
-    if (!config) {
+    if (!config || !config.options) {
       this.log('No config found, disabling plugin.')
       return;
     }
+
+    // Set cloud polling interval
+    this.pollingInterval = this.config.options.pollingInterval || 10;
 
     // Create Tuya Web API instance
     this.tuyaWebApi = new TuyaWebApi(
