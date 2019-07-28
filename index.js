@@ -66,12 +66,16 @@ class TuyaWebPlatform {
             }
             // Get device strate of all devices - once
             this.refreshDeviceStates();
+          }).catch((error) => {
+            this.log.error(error);
           });
 
           // Set interval for refreshing device states
           this.refreshInterval = setInterval(() => {
             this.refreshDeviceStates();
           }, this.pollingInterval * 1000);
+        }).catch((error) => {
+          this.log.error(error);
         });
 
       }.bind(this));
