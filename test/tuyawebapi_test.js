@@ -12,8 +12,8 @@ describe('TuyaWebApi', () => {
 
   before(() => {
     api = new TuyaWebApi(
-      'b.delfos@gmail.com',
-      'yfrHt*?{dh57<~',
+      'xxxxxxx@gmail.com',
+      'xxxxx',
       31,
       'smart_life'
     );
@@ -24,11 +24,19 @@ describe('TuyaWebApi', () => {
 
       api.getOrRefreshToken().then((session) => {
         api.session = session || null;
-        assert.notEqual(session.accessToken, null, 'No valid access token');
+        assert.notEqual(session.accessToken, null, 'No valid access token.');
         done();
       });
 
     })
+    it('should have the arecode set to EU', (done)=> {
+      assert.equal(api.session.areaCode, 'EU', 'Area code is not set.');
+      done();
+    })
+    it('should have the area base url set to EU server', (done)=> {
+      assert.equal(api.session.areaBaseUrl, 'https://px1.tuyaeu.com', 'Area Base URL is not set.');
+      done();
+    });
   })
 
   describe('discover devices', () => {
