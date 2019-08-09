@@ -74,3 +74,9 @@ The source code also has some unit tests to test API calls. Run the following co
 ```
  mocha test/tuyawebapi_test.js
 ```
+
+## Version history
+
+##### Version 0.1.4 - 2019-08-09
+
+* Switch to regional Tuya Web API server after authentication was successful (EU / China / USA).
