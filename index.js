@@ -40,7 +40,8 @@ class TuyaWebPlatform {
       this.config.options.username,
       this.config.options.password,
       this.config.options.countryCode,
-      this.config.options.platform
+      this.config.options.platform,
+      this.log
     );
 
     this.accessories = new Map();
