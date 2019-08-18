@@ -104,12 +104,22 @@ class TuyaWebPlatform {
   }
 
   addAccessory(device) {
-    const deviceType = device.dev_type || 'switch';
+    var deviceType = device.dev_type || 'switch';
     this.log.info('Adding: %s (%s / %s)', device.name || 'unnamed', deviceType, device.id);
 
     // Get UUID
     const uuid = this.api.hap.uuid.generate(device.id);
     const homebridgeAccessory = this.accessories.get(uuid);
+
+    // Is device type overruled in config defaults?
+    if (this.config.defaults) {
+      for (const def of this.config.defaults) {
+        if (def.id === device.id) {
+          deviceType = def.device_type || deviceType;
+          this.log('Device type is overruled in config to: ', deviceType);
+        }
+      }
+    }
 
     // Construct new accessory
     let deviceAccessory;
