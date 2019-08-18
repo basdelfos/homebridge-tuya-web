@@ -45,6 +45,32 @@ The `options` has these properties:
 - `plaform`: The App where your account is registered. `tuya` for Tuya Smart, `smart_life` for Smart Life, `jinvoo_smart` for Jinvoo Smart. Defaults to `tuya`.
 - `pollingInterval`: Optional. The frequency in **seconds** that the plugin polls the cloud to get device updates. When the devices are only controlled through Homebridge, you can set this to a low frequency (high interval nummer, e.g. 180 = 3 minutes). Defaults to 10.
 
+## Overrule / default values
+
+As of version 0.1.6 it is possible to override or set values to default. As of now only overruling device type is posible. See configuration below.
+
+```javascript
+{
+  "platform": "TuyaWebPlatform"
+  "name": "TuyaWebPlatform",
+  "options":
+    {
+      ...
+    },
+  "defaults": [
+    {
+      "id": "<id>",
+      "device_type": "<device_type>"
+    }
+  ]
+}
+```
+
+The `defaults` has these properties:
+
+- `id`: Required. The id for the device that is registered in the Android/iOS App.
+- `device_type`: Optional. The device_type to be overruled. For now only device type `dimmer` is supported. This can be usefull for dimmers that are reported as `light` by the Tuya API and don't support hue and saturation. 
+
 ## Supported device types
 
 There is currently support for the following device types within this Homebridge plugin:
@@ -76,6 +102,15 @@ The source code also has some unit tests to test API calls. Run the following co
 ```
 
 ## Version history
+
+##### Version 0.1.6 - 2019-08-18
+
+* Added light accessory (made by niksauer, thanks!!)
+* Added overruling device type in config. Some dimmers are reported by Tuya API as `lights`. Dimmers don't have hue and saturation and therfor the device type has to  be overruled to `dimmer`.
+
+##### Version 0.1.5 - 2019-08-18
+
+* Fixed issue #17 - Outlets and switches not turning off in Home app when turned off with other app.
 
 ##### Version 0.1.4 - 2019-08-09
 
