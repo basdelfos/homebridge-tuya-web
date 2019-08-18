@@ -1,6 +1,7 @@
 const SwitchAccessory = require('./lib/switch_accessory');
 const OutletAccessory = require('./lib/outlet_accessory');
 const DimmerAccessory = require('./lib/dimmer_accessory');
+const LightAccessory = require('./lib/light_accessory');
 const TuyaWebApi = require('./lib/tuyawebapi');
 
 var Accessory, Service, Characteristic, UUIDGen;
@@ -39,7 +40,8 @@ class TuyaWebPlatform {
       this.config.options.username,
       this.config.options.password,
       this.config.options.countryCode,
-      this.config.options.platform
+      this.config.options.platform,
+      this.log
     );
 
     this.accessories = new Map();
@@ -113,6 +115,9 @@ class TuyaWebPlatform {
     let deviceAccessory;
     switch (deviceType) {
       case 'light':
+        deviceAccessory = new LightAccessory(this, homebridgeAccessory, device);
+        this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
+        break;
       case 'dimmer':
         deviceAccessory = new DimmerAccessory(this, homebridgeAccessory, device);
         this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
