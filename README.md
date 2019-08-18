@@ -103,6 +103,10 @@ The source code also has some unit tests to test API calls. Run the following co
 
 ## Version history
 
+##### Version 0.1.7 - 2019-08-18
+
+* Fixed not correct updating after reboot of Homebridge.
+
 ##### Version 0.1.6 - 2019-08-18
 
 * Added light accessory (made by niksauer, thanks!!)
