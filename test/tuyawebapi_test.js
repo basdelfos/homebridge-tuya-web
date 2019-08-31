@@ -53,7 +53,7 @@ describe('TuyaWebApi', () => {
   describe('get device state', () => {
     it('should get the state of a device', (done) => {
 
-      const deviceId = '563423643c71bf3fe320'; // S4 - Dressoir
+      const deviceId = 'xxxxxxx'; // S4 - Dressoir
       api.getDeviceState(deviceId).then((data) => {
         assert.notEqual(data.state, null, 'No device state received');
         done();
