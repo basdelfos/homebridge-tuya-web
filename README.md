@@ -1,3 +1,5 @@
+!! THIS REPOSITORY IS NOG ACTIVELY MAINTAINED ANYMORE, PLEASE FEEL FREE TO CREATE FORK !!
+
 # homebridge-tuya-web
 
 Homebridge plugin for Tuya devices using a cloud Tuya Web Api.
