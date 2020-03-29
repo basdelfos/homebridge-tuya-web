@@ -6,6 +6,9 @@
   "scripts": {
     "test": "mocha"
   },
+  "files": [
+    "lib/*"
+  ],
   "keywords": [
     "homebridge",
     "homebridge-plugin",
@@ -23,10 +26,15 @@
     "url": "https://github.com/basdelfos/homebridge-tuya-web.git"
   },
   "dependencies": {
-    "request": "^2.88.0"
+    "hap-nodejs": "^0.5.7",
+    "querystring": "^0.2.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5"
   },
   "devDependencies": {
+    "@types/request-promise": "^4.1.46",
     "chai": "^4.2.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.0",
+    "typescript": "^3.8.3"
   }
 }
