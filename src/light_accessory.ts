@@ -324,7 +324,7 @@ export class LightAccessory extends BaseAccessory {
       });
   }
 
-  async updateState(data) {
+  async updateState(data: TuyaDevice['data']) {
     // Update device type specific state
     this.log.debug(
       '[UPDATING][%s]:',

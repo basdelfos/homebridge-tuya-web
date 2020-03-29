@@ -97,9 +97,9 @@ export abstract class BaseAccessory {
     });
   }
 
-  abstract async updateState(data: any): Promise<void>;
+  abstract async updateState(data: TuyaDevice['data']): Promise<void>;
 
-  updateAccessory(device) {
+  updateAccessory(device: TuyaDevice) {
     // Update general accessory information
     if (device.name) {
       this.homebridgeAccessory.displayName = device.name;

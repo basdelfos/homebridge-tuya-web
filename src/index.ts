@@ -1,23 +1,10 @@
-import { SwitchAccessory } from './switch_accessory';
-import { OutletAccessory } from './outlet_accessory';
 import { DimmerAccessory } from './dimmer_accessory';
 import { LightAccessory } from './light_accessory';
+import { OutletAccessory } from './outlet_accessory';
 import TuyaWebApi from './tuyawebapi';
-import { TuyaDevice } from './types';
-
-var Accessory, Service, Characteristic, UUIDGen;
+import { TuyaDevice, PlatformAccessory } from './types';
 
 export default function(homebridge) {
-  // Accessory must be created from PlatformAccessory Constructor
-  Accessory = homebridge.platformAccessory;
-
-  // Service and Characteristic are from hap-nodejs
-  Service = homebridge.hap.Service;
-  Characteristic = homebridge.hap.Characteristic;
-  UUIDGen = homebridge.hap.uuid;
-
-  // For platform plugin to be considered as dynamic platform plugin,
-  // registerPlatform(pluginName, platformName, constructor, dynamic), dynamic must be true
   homebridge.registerPlatform(
     'homebridge-tuya-web',
     'TuyaWebPlatform',
@@ -30,7 +17,7 @@ class TuyaWebPlatform {
   private pollingInterval: number;
   private refreshInterval: NodeJS.Timeout;
   private tuyaWebApi: TuyaWebApi;
-  private accessories: Map<string, any>;
+  private accessories: Map<string, PlatformAccessory>;
 
   constructor(private log, private config, private api) {
     this.pollingInterval = 10; // default 10 seconds
@@ -89,25 +76,25 @@ class TuyaWebPlatform {
     }
   }
 
-  refreshDeviceStates() {
+  async refreshDeviceStates() {
     this.log.debug('Refreshing state for all devices...');
-    this.tuyaWebApi
-      .getAllDeviceStates()
-      .then(devices => {
-        // Refresh device states
-        for (const device of devices) {
-          const uuid = this.api.hap.uuid.generate(device.id);
-          const homebridgeAccessory = this.accessories.get(uuid);
-          if (homebridgeAccessory) {
-            homebridgeAccessory.controller.updateAccessory(device);
-          } else {
-            this.log.error('Could not find accessory in dictionary');
-          }
+    try {
+      const devices = await this.tuyaWebApi.getAllDeviceStates();
+
+      // Refresh device states
+      for (const device of devices) {
+        const uuid = this.api.hap.uuid.generate(device.id);
+        const homebridgeAccessory = this.accessories.get(uuid);
+
+        if (homebridgeAccessory) {
+          homebridgeAccessory.controller.updateAccessory(device);
+        } else {
+          this.log.error('Could not find accessory in dictionary');
         }
-      })
-      .catch(error => {
-        this.log.error('Error retrieving devices states', error);
-      });
+      }
+    } catch (error) {
+      this.log.error('Error retrieving devices states', error);
+    }
   }
 
   addAccessory(device: TuyaDevice) {
@@ -150,6 +137,7 @@ class TuyaWebPlatform {
         break;
       case 'switch':
       case 'outlet':
+      case 'cover':
         deviceAccessory = new OutletAccessory(
           this,
           homebridgeAccessory,

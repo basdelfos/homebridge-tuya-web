@@ -158,7 +158,7 @@ export class DimmerAccessory extends BaseAccessory {
       );
   }
 
-  async updateState(data) {
+  async updateState(data: TuyaDevice['data']) {
     // Update device type specific state
     this.log.debug(
       '[UPDATING][%s]:',
@@ -170,8 +170,10 @@ export class DimmerAccessory extends BaseAccessory {
       this.service.getCharacteristic(Characteristic.On).updateValue(state);
       this.setCachedState(Characteristic.On, state);
     }
-    if (data.percentage) {
-      const percentage = Math.floor((parseInt(data.brightness) / 255) * 100);
+    if (data.percentage | data.brightness) {
+      const percentage = Math.floor(
+        (parseInt((data.percentage || data.brightness).toString()) / 255) * 100
+      );
       this.service
         .getCharacteristic(Characteristic.Brightness)
         .updateValue(percentage);

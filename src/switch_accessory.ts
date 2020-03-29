@@ -7,6 +7,7 @@ import {
 
 import TuyaWebApi from './tuyawebapi';
 import { BaseAccessory } from './base_accessory';
+import { TuyaDevice } from './types';
 
 export class SwitchAccessory extends BaseAccessory {
   constructor(platform, homebridgeAccessory, deviceConfig) {
@@ -74,13 +75,13 @@ export class SwitchAccessory extends BaseAccessory {
       });
   }
 
-  async updateState(data) {
+  async updateState(data: TuyaDevice['data']) {
     this.log.debug(
       '[UPDATING][%s]:',
       this.homebridgeAccessory.displayName,
       data
     );
-    const state = data.state === true;
+    const state = data.state == true;
     this.service.getCharacteristic(Characteristic.On).updateValue(data.state);
     this.setCachedState(Characteristic.On, state);
   }

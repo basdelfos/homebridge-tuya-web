@@ -79,7 +79,7 @@ export class OutletAccessory extends BaseAccessory {
       });
   }
 
-  async updateState(data) {
+  async updateState(data: TuyaDevice['data']) {
     this.log.debug(
       '[UPDATING][%s]:',
       this.homebridgeAccessory.displayName,
