@@ -8,9 +8,10 @@ import {
 import TuyaWebApi from './tuyawebapi';
 import { BaseAccessory } from './base_accessory';
 import { pifyGetEvt, pifySetEvt } from './promisifyEvent';
+import { TuyaDevice } from './types';
 
 export class DimmerAccessory extends BaseAccessory {
-  constructor(platform, homebridgeAccessory, deviceConfig) {
+  constructor(platform, homebridgeAccessory, deviceConfig: TuyaDevice) {
     super(
       platform,
       homebridgeAccessory,

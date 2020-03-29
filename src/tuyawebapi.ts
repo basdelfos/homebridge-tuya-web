@@ -1,5 +1,6 @@
 import request from 'request-promise';
 import querystring from 'querystring';
+import { TuyaDevice } from './types';
 
 class Session {
   private expiresOn: number;
@@ -70,11 +71,15 @@ class TuyaWebApi {
       },
     };
 
-    const obj = await this.sendRequestJson(
+    const obj = await this.sendRequestJson<{
+      devices: TuyaDevice[];
+      scenes: {}[];
+    }>(
       this.session.areaBaseUrl + '/homeassistant/skill',
       JSON.stringify(data),
       'GET'
     );
+
     if (obj.header && obj.header.code === 'SUCCESS') {
       if (obj.payload && obj.payload.devices) {
         return obj.payload.devices;
@@ -105,7 +110,13 @@ class TuyaWebApi {
       },
     };
 
-    const obj = await this.sendRequestJson(
+    const obj = await this.sendRequestJson<{
+      data: {
+        support_stop: boolean;
+        online: boolean;
+        state: number | string;
+      };
+    }>(
       this.session.areaBaseUrl + '/homeassistant/skill',
       JSON.stringify(data),
       'GET'
@@ -146,11 +157,11 @@ class TuyaWebApi {
       'POST'
     );
     if (!(obj.header && obj.header.code === 'SUCCESS')) {
-      throw new Error(`Invalid payload in response: ${obj.toStrnig()}`);
+      throw new Error(`Invalid payload in response: ${obj.toString()}`);
     }
   }
 
-  async getOrRefreshToken() {
+  async getOrRefreshToken(): Promise<Session> {
     if (!this.session.hasToken()) {
       // No token, lets get a token from the Tuya Web API
       if (!this.username) {
@@ -239,12 +250,14 @@ class TuyaWebApi {
       if (this.session.hasToken() && this.session.isTokenExpired()) {
         // Refresh token
 
-        const obj = await this.sendRequestJson(
-          this.session.areaBaseUrl +
-            '/homeassistant/access.do?grant_type=refresh_token&refresh_token=' +
-            this.session.refreshToken,
-          '',
-          'GET'
+        const obj = JSON.parse(
+          await this.sendRequest(
+            this.session.areaBaseUrl +
+              '/homeassistant/access.do?grant_type=refresh_token&refresh_token=' +
+              this.session.refreshToken,
+            '',
+            'GET'
+          )
         );
         this.session.resetToken(
           obj.access_token,
@@ -271,12 +284,19 @@ class TuyaWebApi {
     });
   }
 
-  async sendRequestJson(url: string, body: any, method: string) {
+  async sendRequestJson<payload extends any = null>(
+    url: string,
+    body: any,
+    method: string
+  ) {
     // this.log.debug(JSON.stringify(body));
     const result = await this.sendRequest(url, body, method);
     try {
       const obj = JSON.parse(result);
-      return obj;
+      return obj as {
+        payload: payload;
+        header: { code: string; payloadVersion: 1 };
+      };
     } catch (err) {
       throw new Error(`Could not parse json. Body: ${result} ${err}`);
     }

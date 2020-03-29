@@ -3,6 +3,7 @@ import { OutletAccessory } from './outlet_accessory';
 import { DimmerAccessory } from './dimmer_accessory';
 import { LightAccessory } from './light_accessory';
 import TuyaWebApi from './tuyawebapi';
+import { TuyaDevice } from './types';
 
 var Accessory, Service, Characteristic, UUIDGen;
 
@@ -27,7 +28,7 @@ export default function(homebridge) {
 
 class TuyaWebPlatform {
   private pollingInterval: number;
-  private refreshInterval: number;
+  private refreshInterval: NodeJS.Timeout;
   private tuyaWebApi: TuyaWebApi;
   private accessories: Map<string, any>;
 
@@ -61,42 +62,30 @@ class TuyaWebPlatform {
       // Listen to event "didFinishLaunching", this means homebridge already finished loading cached accessories.
       // Platform Plugin should only register new accessory that doesn't exist in homebridge after this event.
       // Or start discover new accessories.
-      this.api.on(
-        'didFinishLaunching',
-        function() {
-          this.log('Initializing TuyaWebPlatform...');
-
+      this.api.on('didFinishLaunching', async () => {
+        this.log('Initializing TuyaWebPlatform...');
+        try {
           // Get access token
-          this.tuyaWebApi
-            .getOrRefreshToken()
-            .then(token => {
-              this.tuyaWebApi.token = token;
+          const token = await this.tuyaWebApi.getOrRefreshToken();
 
-              // Start discovery for devices
-              this.tuyaWebApi
-                .discoverDevices()
-                .then(devices => {
-                  // Add devices to Homebridge
-                  for (const device of devices) {
-                    this.addAccessory(device);
-                  }
-                  // Get device strate of all devices - once
-                  this.refreshDeviceStates();
-                })
-                .catch(error => {
-                  this.log.error(error);
-                });
+          // Start discovery for devices
+          const devices = await this.tuyaWebApi.discoverDevices();
 
-              // Set interval for refreshing device states
-              this.refreshInterval = setInterval(() => {
-                this.refreshDeviceStates();
-              }, this.pollingInterval * 1000);
-            })
-            .catch(error => {
-              this.log.error(error);
-            });
-        }.bind(this)
-      );
+          // Add devices to Homebridge
+          for (const device of devices) {
+            this.addAccessory(device);
+          }
+          // Get device strate of all devices - once
+          this.refreshDeviceStates();
+        } catch (error) {
+          this.log.error(error);
+        }
+      });
+
+      // Set interval for refreshing device states
+      this.refreshInterval = setInterval(() => {
+        this.refreshDeviceStates();
+      }, this.pollingInterval * 1000);
     }
   }
 
@@ -121,7 +110,7 @@ class TuyaWebPlatform {
       });
   }
 
-  addAccessory(device) {
+  addAccessory(device: TuyaDevice) {
     var deviceType = device.dev_type || 'switch';
     this.log.info(
       'Adding: %s (%s / %s)',

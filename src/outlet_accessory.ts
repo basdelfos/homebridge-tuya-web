@@ -7,9 +7,10 @@ import {
 
 import TuyaWebApi from './tuyawebapi';
 import { BaseAccessory } from './base_accessory';
+import { TuyaDevice } from './types';
 
 export class OutletAccessory extends BaseAccessory {
-  constructor(platform, homebridgeAccessory, deviceConfig) {
+  constructor(platform, homebridgeAccessory, deviceConfig: TuyaDevice) {
     super(
       platform,
       homebridgeAccessory,

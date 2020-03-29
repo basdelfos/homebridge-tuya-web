@@ -4,6 +4,7 @@ import {
   Characteristic,
   CharacteristicValue,
 } from 'hap-nodejs';
+import { TuyaDevice } from './types';
 
 export abstract class BaseAccessory {
   public deviceId: string;
@@ -19,7 +20,7 @@ export abstract class BaseAccessory {
   constructor(
     public platform,
     public homebridgeAccessory,
-    public deviceConfig,
+    public deviceConfig: TuyaDevice,
     public categoryType
   ) {
     this.deviceId = deviceConfig.id;

@@ -6,6 +6,7 @@ import {
   Characteristic,
   CharacteristicEventTypes,
 } from 'hap-nodejs';
+import { TuyaDevice } from './types';
 
 type Color = {
   brightness?: number;
@@ -14,7 +15,7 @@ type Color = {
 };
 
 export class LightAccessory extends BaseAccessory {
-  constructor(platform, homebridgeAccessory, deviceConfig) {
+  constructor(platform, homebridgeAccessory, deviceConfig: TuyaDevice) {
     super(
       platform,
       homebridgeAccessory,
