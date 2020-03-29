@@ -125,7 +125,7 @@ class TuyaWebApi {
     if (obj.payload && obj.header && obj.header.code === 'SUCCESS') {
       return obj.payload.data;
     } else {
-      throw new Error(`Invalid payload in response: ${obj}`);
+      throw new Error(`Invalid payload in response: ${JSON.stringify(obj)}`);
     }
   }
 
@@ -157,7 +157,7 @@ class TuyaWebApi {
       'POST'
     );
     if (!(obj.header && obj.header.code === 'SUCCESS')) {
-      throw new Error(`Invalid payload in response: ${obj.toString()}`);
+      throw new Error(`Invalid payload in response: ${JSON.stringify(obj)}`);
     }
   }
 
