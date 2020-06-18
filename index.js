@@ -1,6 +1,7 @@
 const SwitchAccessory = require('./lib/switch_accessory');
 const OutletAccessory = require('./lib/outlet_accessory');
 const DimmerAccessory = require('./lib/dimmer_accessory');
+const LightAccessory = require('./lib/light_accessory');
 const TuyaWebApi = require('./lib/tuyawebapi');
 
 var Accessory, Service, Characteristic, UUIDGen;
@@ -39,7 +40,8 @@ class TuyaWebPlatform {
       this.config.options.username,
       this.config.options.password,
       this.config.options.countryCode,
-      this.config.options.platform
+      this.config.options.platform,
+      this.log
     );
 
     this.accessories = new Map();
@@ -102,17 +104,30 @@ class TuyaWebPlatform {
   }
 
   addAccessory(device) {
-    const deviceType = device.dev_type || 'switch';
+    var deviceType = device.dev_type || 'switch';
     this.log.info('Adding: %s (%s / %s)', device.name || 'unnamed', deviceType, device.id);
 
     // Get UUID
     const uuid = this.api.hap.uuid.generate(device.id);
     const homebridgeAccessory = this.accessories.get(uuid);
 
+    // Is device type overruled in config defaults?
+    if (this.config.defaults) {
+      for (const def of this.config.defaults) {
+        if (def.id === device.id) {
+          deviceType = def.device_type || deviceType;
+          this.log('Device type is overruled in config to: ', deviceType);
+        }
+      }
+    }
+
     // Construct new accessory
     let deviceAccessory;
     switch (deviceType) {
       case 'light':
+        deviceAccessory = new LightAccessory(this, homebridgeAccessory, device);
+        this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
+        break;
       case 'dimmer':
         deviceAccessory = new DimmerAccessory(this, homebridgeAccessory, device);
         this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
