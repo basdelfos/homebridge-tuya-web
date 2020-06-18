@@ -1,4 +1,7 @@
-!! THIS REPOSITORY IS NOT ACTIVELY MAINTAINED ANYMORE, PLEASE FEEL FREE TO CREATE FORK !!
+## Announcement
+[Milo526](https://github.com/milo526) has been so kindfull to take this repository to the next level, go see his repository on https://github.com/milo526/homebridge-tuya-web. 
+
+For futher development and bugfixing, I recommand to use his repository.
 
 # homebridge-tuya-web
 
