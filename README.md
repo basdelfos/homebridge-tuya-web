@@ -96,7 +96,6 @@ These features are on my wishlist and need to be implemented:
 
 - Implement devices that are not supported yet.
 - Add option to enable/disable state caching.
-- Add option to change polling frequency to user defined value (default is now 10 seconds).
 
 ## Unit tests
 
