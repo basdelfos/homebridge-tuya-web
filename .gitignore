@@ -65,3 +65,5 @@ typings/
 
 # vs code garbage
 .vscode
+
+lib/

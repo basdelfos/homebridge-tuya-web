@@ -1,32 +1,42 @@
-const TuyaWebApi = require('./tuyawebapi');
+import {
+  Accessory,
+  Service,
+  Characteristic,
+  CharacteristicValue,
+} from 'hap-nodejs';
+import { TuyaDevice } from './types';
 
-let PlatformAccessory;
-let Accessory;
-let Service;
-let Characteristic;
-let UUIDGen;
+export abstract class BaseAccessory {
+  public deviceId: string;
+  public log: any;
+  public cachedState: Map<string, CharacteristicValue> = new Map();
+  public validCache: boolean = false;
+  public serviceType: typeof Service;
+  public service: Service;
 
-class BaseAccessory {
-  constructor(platform, homebridgeAccessory, deviceConfig, categoryType) {
-    this.platform = platform;
+  private PlatformAccessory;
+  private UUIDGen: any;
+
+  constructor(
+    public platform,
+    public homebridgeAccessory,
+    public deviceConfig: TuyaDevice,
+    public categoryType
+  ) {
     this.deviceId = deviceConfig.id;
     this.categoryType = categoryType;
-    PlatformAccessory = platform.api.platformAccessory;
 
-    ({ Accessory, Service, Characteristic, uuid: UUIDGen } = platform.api.hap);
+    this.PlatformAccessory = platform.api.platformAccessory;
+
+    this.UUIDGen = platform.api.hap.uuid;
 
     this.log = platform.log;
     this.homebridgeAccessory = homebridgeAccessory;
     this.deviceConfig = deviceConfig;
 
-    // Setup caching
-    this.cachedState = new Map();
-    this.validCache = false;
-
-    this.serviceType;
     switch (categoryType) {
       case Accessory.Categories.LIGHTBULB:
-        this.serviceType = Service.Lightbulb
+        this.serviceType = Service.Lightbulb;
         break;
       case Accessory.Categories.SWITCH:
         this.serviceType = Service.Switch;
@@ -51,15 +61,16 @@ class BaseAccessory {
         'Existing Accessory found [%s] [%s] [%s]',
         homebridgeAccessory.displayName,
         homebridgeAccessory.context.deviceId,
-        homebridgeAccessory.UUID);
+        homebridgeAccessory.UUID
+      );
       this.homebridgeAccessory.displayName = this.deviceConfig.name;
-    }
-    else {
+    } else {
       this.log.info('Creating New Accessory %s', this.deviceConfig.id);
-      this.homebridgeAccessory = new PlatformAccessory(
+      this.homebridgeAccessory = new this.PlatformAccessory(
         this.deviceConfig.name,
-        UUIDGen.generate(this.deviceConfig.id),
-        categoryType);
+        this.UUIDGen.generate(this.deviceConfig.id),
+        categoryType
+      );
       this.homebridgeAccessory.context.deviceId = this.deviceConfig.id;
       this.homebridgeAccessory.controller = this;
       this.platform.registerPlatformAccessory(this.homebridgeAccessory);
@@ -68,11 +79,16 @@ class BaseAccessory {
     // Create service
     this.service = this.homebridgeAccessory.getService(this.serviceType);
     if (this.service) {
-      this.service.setCharacteristic(Characteristic.Name, this.deviceConfig.name);
-    }
-    else {
+      this.service.setCharacteristic(
+        Characteristic.Name,
+        this.deviceConfig.name
+      );
+    } else {
       this.log.debug('Creating New Service %s', this.deviceConfig.id);
-      this.service = this.homebridgeAccessory.addService(this.serviceType, this.deviceConfig.name);
+      this.service = this.homebridgeAccessory.addService(
+        this.serviceType,
+        this.deviceConfig.name
+      );
     }
 
     this.homebridgeAccessory.on('identify', (paired, callback) => {
@@ -81,17 +97,20 @@ class BaseAccessory {
     });
   }
 
-  updateAccessory(device) {
+  abstract async updateState(data: TuyaDevice['data']): Promise<void>;
+
+  updateAccessory(device: TuyaDevice) {
     // Update general accessory information
     if (device.name) {
       this.homebridgeAccessory.displayName = device.name;
-      this.homebridgeAccessory._associatedHAPAccessory.displayName = device.name;
-      var accessoryInformationService = (
+      this.homebridgeAccessory._associatedHAPAccessory.displayName =
+        device.name;
+      var accessoryInformationService =
         this.homebridgeAccessory.getService(Service.AccessoryInformation) ||
-        this.homebridgeAccessory.addService(Service.AccessoryInformation));
-      var characteristicName = (
+        this.homebridgeAccessory.addService(Service.AccessoryInformation);
+      var characteristicName =
         accessoryInformationService.getCharacteristic(Characteristic.Name) ||
-        accessoryInformationService.addCharacteristic(Characteristic.Name));
+        accessoryInformationService.addCharacteristic(Characteristic.Name);
       if (characteristicName) {
         characteristicName.setValue(device.name);
       }
@@ -128,5 +147,3 @@ class BaseAccessory {
     this.validCache = false;
   }
 }
-
-module.exports = BaseAccessory;

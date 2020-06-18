@@ -1,11 +1,16 @@
 {
-  "name": "homebridge-tuya-web",
+  "name": "@vitramir/homebridge-tuya-web",
   "version": "0.1.7",
   "description": "Homebrigde plugin for use with Tuya devices (uses Home Assistant Tuya Web API)",
   "main": "index.js",
   "scripts": {
+    "prepare": "rimraf ./lib && tsc",
     "test": "mocha"
   },
+  "files": [
+    "lib/*",
+    "index.js"
+  ],
   "keywords": [
     "homebridge",
     "homebridge-plugin",
@@ -23,10 +28,19 @@
     "url": "https://github.com/basdelfos/homebridge-tuya-web.git"
   },
   "dependencies": {
-    "request": "^2.88.0"
+    "hap-nodejs": "^0.5.7",
+    "querystring": "^0.2.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.5"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
+    "@types/request-promise": "^4.1.46",
     "chai": "^4.2.0",
-    "mocha": "^6.2.0"
+    "mocha": "^6.2.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^3.8.3"
   }
 }
