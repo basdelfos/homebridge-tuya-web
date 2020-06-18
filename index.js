@@ -132,6 +132,7 @@ class TuyaWebPlatform {
         deviceAccessory = new DimmerAccessory(this, homebridgeAccessory, device);
         this.accessories.set(uuid, deviceAccessory.homebridgeAccessory);
         break;
+      case 'cover':
       case 'switch':
       case 'outlet':
         deviceAccessory = new OutletAccessory(this, homebridgeAccessory, device);
